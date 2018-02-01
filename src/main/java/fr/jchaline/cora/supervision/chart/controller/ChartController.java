@@ -3,10 +3,8 @@ package fr.jchaline.cora.supervision.chart.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,21 +34,32 @@ public class ChartController extends AbstractSupervisionChartController {
 		}
 	}
 	
-	@RequestMapping(value = "/ajax", method = RequestMethod.POST)
-	public Map<String, String> getSearchResultViaAjax(@RequestBody Map<String, String> search) {
-
-		return search;
-	}
-	
 	//soit pour une meme url l'évolution temps moyen sur plusieurs jours
 	@RequestMapping("/evolutionUrl")
 	public List<Action> evolutionUrl(@RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
 		return actionService.evolutionUrl(url, dateDebut, dateFin);
 	}
 
+	/**
+	 * Liste des différentes URL sur une période donnée
+	 * @param dateDebut
+	 * @param dateFin
+	 * @return
+	 */
 	@RequestMapping("/listUrl")
 	public List<String> listUrl(@RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
 		return actionService.listUrl(dateDebut, dateFin);
+	}
+	
+	/**
+	 * Liste des différentes URL sur une période donnée
+	 * @param dateDebut
+	 * @param dateFin
+	 * @return
+	 */
+	@RequestMapping("/listAction")
+	public List<Action> listActionAvg(@RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+		return actionService.listActionAvg(dateDebut, dateFin);
 	}
 	
 	//soit pour l'ensemble des requete le temps moyen à date 

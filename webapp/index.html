@@ -78,11 +78,19 @@
 							<i class="glyphicon glyphicon-refresh"></i>
 							<span class="hidden-xs">update Url</span>
 						</button>
+						<button class="btn btn-xs btn-primary" data-ng-click="actionSort='-maxTime'">
+							<i class="glyphicon glyphicon-refresh"></i>
+							<span class="hidden-xs">Max</span>
+						</button>
+						<button class="btn btn-xs btn-primary" data-ng-click="actionSort='-avgTime'">
+							<i class="glyphicon glyphicon-refresh"></i>
+							<span class="hidden-xs">Avg</span>
+						</button>
 					</span>
 				</h3>
 				<div style="height: 500px; overflow-y: scroll;">
 					<ul>
-						<li ng-repeat="url in urls | orderBy"><input id="{{ url }}" ng-click="updateLine(url)" type="checkbox" value="{{ url }}" />&nbsp;<label for="{{ url }}">{{ url }}</label></li>
+						<li ng-repeat="action in actions | orderBy: actionSort"><input id="{{ action.url }}" ng-click="updateLine(action.url)" type="checkbox" value="{{ action.url }}" />&nbsp;<label for="{{ action.url }}">{{ action.url }} (avg: {{action.avgTime}}, max: {{action.maxTime}})</label></li>
 					</ul>
 				</div>
 			</div>

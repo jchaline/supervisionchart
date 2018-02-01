@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -88,8 +89,20 @@ public class ActionService {
 		final String strUrlPattern = "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}):\\d{2},\\d{3} +\\/([\\w\\.]+)\\.do";
 		Pattern urlPattern = Pattern.compile(strUrlPattern);
 
-		final String strAvgTimePattern = ".*Temps d'execution moyen \\(ms\\) : (\\d+)";
+		final String strAvgTimePattern = ".*Temps d'execution moyen \\(ms\\)\\s+:\\s+(\\d+)";
 		Pattern avgTimePattern = Pattern.compile(strAvgTimePattern) ;
+
+		final String strMiniTimePattern = ".*Temps d'execution mini \\(ms\\)\\s+:\\s+(\\d+)";
+		Pattern miniTimePattern = Pattern.compile(strMiniTimePattern) ;
+
+		final String strMaxiTimePattern = ".*Temps d'execution maxi \\(ms\\)\\s+:\\s+(\\d+)";
+		Pattern maxiTimePattern = Pattern.compile(strMaxiTimePattern) ;
+		
+		final String strTotalTimePattern = ".*Temps d'execution total \\(ms\\)\\s+:\\s+(\\d+)";
+		Pattern totalTimePattern = Pattern.compile(strTotalTimePattern) ;
+
+		final String strNbExecutionPattern = ".*Nombre de demande\\s+:\\s+(\\d+)";
+		Pattern nbExecutionPattern = Pattern.compile(strNbExecutionPattern) ;
 
 		final String strRepartitionPattern = ".*Repartition.*: (\\d+ - \\d+ - \\d+ - \\d+ - \\d+)";
 		Pattern repartitionPattern = Pattern.compile(strRepartitionPattern) ;
@@ -105,7 +118,7 @@ public class ActionService {
 		boolean readData = false;
 		int i = 1;
 		for (LsEntry entry : entries) {
-			LOGGER.info("{} sur {} : {}", i++, entries.size(), entry.getFilename());
+			LOGGER.info("Fichier {} sur {} : {}", i++, entries.size(), entry.getFilename());
 			
 			InputStream stream = sftpChannel.get(entry.getFilename());
 			BufferedReader br = new BufferedReader(new InputStreamReader(stream));
@@ -130,25 +143,45 @@ public class ActionService {
 					currentAction = new Action();
 					currentAction.setUrl(currentUrl);
 					currentAction.setDateExtraction(LocalDateTime.parse(currentDateTime, DATE_TIME_FORMATER));
-				} else if (readData) {
+				}
+				else if (readData) {
 					Matcher matcherAvgTime = avgTimePattern.matcher(line);
 					Matcher matcherRepartition = repartitionPattern.matcher(line);
+					Matcher matcherMini = miniTimePattern.matcher(line);
+					Matcher matcherMaxi = maxiTimePattern.matcher(line);
+					Matcher matcherTotal = totalTimePattern.matcher(line);
+					Matcher matcherNbExec = nbExecutionPattern.matcher(line);
 					if (matcherAvgTime.find()) {
 						String avgTime = matcherAvgTime.group(1);
-						currentAction.setMaxTime(1000);
-						currentAction.setMinTime(1000);
-						currentAction.setTotalTime(1000);
 						currentAction.setAvgTime(Integer.valueOf(avgTime));
-					} else if (matcherRepartition.find()) {
+					}
+					else if (matcherRepartition.find()) {
 						String repartition = matcherRepartition.group(1);
 						String[] split = repartition.split(" - ");
 						int[] array = Arrays.stream(split).mapToInt(Integer::parseInt).toArray();
 						currentAction.setRepartition(array);
 					}
+					else if (matcherMini.find()) {
+						String minTime = matcherMini.group(1);
+						currentAction.setMinTime(Integer.valueOf(minTime));
+					}
+					else if (matcherMaxi.find()) {
+						String maxTime = matcherMaxi.group(1);
+						currentAction.setMaxTime(Integer.valueOf(maxTime));
+					}
+					else if (matcherTotal.find()) {
+						String totalTime = matcherTotal.group(1);
+						currentAction.setTotalTime(Integer.valueOf(totalTime));
+					}
+					else if (matcherNbExec.find()) {
+						String nbExec = matcherNbExec.group(1);
+						currentAction.setNb(Integer.valueOf(nbExec));
+					}
 				}
 			}
 			
 			if (currentAction != null) {
+				currentAction.setTotalTime(currentAction.getNb() * currentAction.getAvgTime());
 				listAction.add(currentAction);
 			}
 			
@@ -165,7 +198,6 @@ public class ActionService {
 	}
 	
 	public List<Action> evolutionUrl(String url, LocalDate debut, LocalDate fin) {
-		
 		List<Action> collect = new ArrayList<>();
 		
 		if (dumbCache != null) {
@@ -189,6 +221,49 @@ public class ActionService {
 		}
 		
 		return collect;
+	}
+
+	/**
+	 * Liste des différentes URL contactés durant la période donnée avec temps moyen de réponse
+	 * @param dateDebut
+	 * @param dateFin
+	 * @return
+	 */
+	public List<Action> listActionAvg(LocalDate firstDay, LocalDate lastDay) {
+		List<Action> result = new ArrayList<>();
+		
+		if (dumbCache != null) {
+			Map<String, List<Action>> grouped = dumbCache.parallelStream()
+					.filter(e -> e.getDateExtraction().toLocalDate().isAfter(firstDay))
+					.filter(e -> e.getDateExtraction().toLocalDate().isBefore(lastDay))
+					.collect(Collectors.groupingBy(Action::getUrl, Collectors.toList()));
+			Stream<Action> calcul = grouped.entrySet().parallelStream().map(e -> {
+				int[] repartition = new int[5];
+				int totalTime = 0;
+				int minTime  = Integer.MAX_VALUE;
+				int maxTime = 0;
+				int avgTime = 0;
+				int nb = 0;
+				
+				for (Action a : e.getValue()) {
+					for (int i=0; i<repartition.length; i++) {
+						repartition[i] += a.getRepartition()[i];
+					}
+					nb += a.getNb();
+					totalTime += a.getTotalTime();
+					if (a.getMinTime() < minTime) minTime = a.getMinTime();
+					if (a.getMaxTime() > maxTime) maxTime = a.getMaxTime();
+					avgTime += (a.getAvgTime() * a.getNb());
+				}
+				avgTime /= nb;
+
+				Action action = new Action(e.getKey(), e.getValue().size(), repartition, totalTime, minTime, maxTime, avgTime, LocalDateTime.now());
+				return action;
+			});
+			result = calcul.collect(Collectors.toList());
+		}
+		
+		return result;
 	}
 
 }

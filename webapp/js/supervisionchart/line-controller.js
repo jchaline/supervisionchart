@@ -4,9 +4,14 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	
 	var colors = ["rgb(192, 75, 100)", "rgb(100, 75, 100)", "rgb(192, 200, 100)", "rgb(192, 75, 200)", "rgb(192, 75, 0)", "rgb(50, 200, 50)", "rgb(200, 50, 200)", "rgb(150, 50, 200)"]
 	
+	$scope.actionSort = "-avgTime"
+	
 	$scope.updateUrl = function() {
 		httpService.getData("/chart/listUrl", {dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 			$scope.urls = data
+		})
+		httpService.getData("/chart/listAction", {dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+			$scope.actions = data
 		})
 	}
 
