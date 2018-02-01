@@ -28,9 +28,9 @@ public class ActionServiceTest {
 	@Test
 	public void evolutionUrl() {
 		int[] repart = {2, 3, 4, 2, 1};
-		Action a1 = new Action("test", 200, repart, 100, 20, 30, 22, LocalDateTime.now().minusDays(1).minusMinutes(243));
-		Action a2 = new Action("test", 400, repart, 100, 20, 30, 22, LocalDateTime.now().minusDays(1));
-		Action a3 = new Action("test", 300, repart, 100, 20, 30, 22, LocalDateTime.now().minusDays(2));
+		Action a1 = new Action("lx01", "test", 200, repart, 100, 20, 30, 22, LocalDateTime.now().minusDays(1).minusMinutes(243));
+		Action a2 = new Action("lx01", "test", 400, repart, 100, 20, 30, 22, LocalDateTime.now().minusDays(1));
+		Action a3 = new Action("lx01", "test", 300, repart, 100, 20, 30, 22, LocalDateTime.now().minusDays(2));
 		
 		List<Action> origin = Arrays.asList(a1, a2, a3);
 		List<Action> joinOnDay = Arrays.asList(a1, a2, a3);

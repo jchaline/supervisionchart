@@ -141,6 +141,7 @@ public class ActionService {
 					
 					//nouvelle url, nouvelle action
 					currentAction = new Action();
+					currentAction.setServer("lx01");
 					currentAction.setUrl(currentUrl);
 					currentAction.setDateExtraction(LocalDateTime.parse(currentDateTime, DATE_TIME_FORMATER));
 				}
@@ -229,11 +230,12 @@ public class ActionService {
 	 * @param dateFin
 	 * @return
 	 */
-	public List<Action> listActionAvg(LocalDate firstDay, LocalDate lastDay) {
+	public List<Action> listActionAvg(String server, LocalDate firstDay, LocalDate lastDay) {
 		List<Action> result = new ArrayList<>();
 		
 		if (dumbCache != null) {
 			Map<String, List<Action>> grouped = dumbCache.parallelStream()
+					.filter(e -> e.getServer().equals(server))
 					.filter(e -> e.getDateExtraction().toLocalDate().isAfter(firstDay))
 					.filter(e -> e.getDateExtraction().toLocalDate().isBefore(lastDay))
 					.collect(Collectors.groupingBy(Action::getUrl, Collectors.toList()));
@@ -257,7 +259,7 @@ public class ActionService {
 				}
 				avgTime /= nb;
 
-				Action action = new Action(e.getKey(), e.getValue().size(), repartition, totalTime, minTime, maxTime, avgTime, LocalDateTime.now());
+				Action action = new Action("", e.getKey(), e.getValue().size(), repartition, totalTime, minTime, maxTime, avgTime, LocalDateTime.now());
 				return action;
 			});
 			result = calcul.collect(Collectors.toList());

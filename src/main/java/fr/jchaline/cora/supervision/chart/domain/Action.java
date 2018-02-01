@@ -20,6 +20,9 @@ import lombok.NoArgsConstructor;
 public class Action extends AbstractEntity {
 	
 	@Column(nullable = false)
+	private String server;
+	
+	@Column(nullable = false)
 	private String url;
 	
 	@Column

@@ -24,7 +24,7 @@ public class ChartController extends AbstractSupervisionChartController {
 	private ActionService actionService;
 	
 	@RequestMapping(value = "/updateAction", method = RequestMethod.POST)
-	public boolean updateAction() {
+	public boolean updateAction(@RequestParam String server) {
 		try {
 			actionService.updateActionFromServer();
 			return true;
@@ -36,7 +36,7 @@ public class ChartController extends AbstractSupervisionChartController {
 	
 	//soit pour une meme url l'évolution temps moyen sur plusieurs jours
 	@RequestMapping("/evolutionUrl")
-	public List<Action> evolutionUrl(@RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+	public List<Action> evolutionUrl(@RequestParam String server, @RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
 		return actionService.evolutionUrl(url, dateDebut, dateFin);
 	}
 
@@ -47,7 +47,7 @@ public class ChartController extends AbstractSupervisionChartController {
 	 * @return
 	 */
 	@RequestMapping("/listUrl")
-	public List<String> listUrl(@RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+	public List<String> listUrl(@RequestParam String server, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
 		return actionService.listUrl(dateDebut, dateFin);
 	}
 	
@@ -58,8 +58,8 @@ public class ChartController extends AbstractSupervisionChartController {
 	 * @return
 	 */
 	@RequestMapping("/listAction")
-	public List<Action> listActionAvg(@RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
-		return actionService.listActionAvg(dateDebut, dateFin);
+	public List<Action> listActionAvg(@RequestParam String server, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+		return actionService.listActionAvg(server, dateDebut, dateFin);
 	}
 	
 	//soit pour l'ensemble des requete le temps moyen à date 

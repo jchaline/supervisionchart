@@ -7,17 +7,17 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	$scope.actionSort = "-avgTime"
 	
 	$scope.updateUrl = function() {
-		httpService.getData("/chart/listUrl", {dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+		httpService.getData("/chart/listUrl", {server: 'lx01', dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 			$scope.urls = data
 		})
-		httpService.getData("/chart/listAction", {dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+		httpService.getData("/chart/listAction", {server: 'lx01', dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 			$scope.actions = data
 		})
 	}
 
 	$scope.updateLine = function(urlAction) {
 		console.log("search for " + urlAction)
-		httpService.getData("/chart/evolutionUrl", {url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+		httpService.getData("/chart/evolutionUrl", {server: 'lx01', url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 			
 			//{url: "commandes.afficherListArtCmdResultat", nb: 0, repartition: Array(5), totalTime: 1000, dateExtraction:{month: "NOVEMBER", year: 2017}}
 			
@@ -49,7 +49,7 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	}
 	
 	$scope.updateTimes = function() {
-		httpService.postData("/chart/updateAction", {}).then(function(data){
+		httpService.postData("/chart/updateAction", {server: 'lx01'}).then(function(data){
 		})
 	}
 
