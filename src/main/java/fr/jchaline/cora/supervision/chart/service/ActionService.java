@@ -177,4 +177,18 @@ public class ActionService {
 		return collect;
 	}
 
+	public List<String> listUrl(LocalDate firstDay, LocalDate lastDay) {
+		List<String> collect = new ArrayList<>();
+		
+		if (dumbCache != null) {
+			collect = dumbCache.parallelStream()
+					.filter(e -> e.getDateExtraction().toLocalDate().isAfter(firstDay))
+					.filter(e -> e.getDateExtraction().toLocalDate().isBefore(lastDay))
+					.map(e -> e.getUrl())
+					.distinct().collect(Collectors.toList());
+		}
+		
+		return collect;
+	}
+
 }

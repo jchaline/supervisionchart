@@ -39,14 +39,18 @@ public class ChartController extends AbstractSupervisionChartController {
 	@RequestMapping(value = "/ajax", method = RequestMethod.POST)
 	public Map<String, String> getSearchResultViaAjax(@RequestBody Map<String, String> search) {
 
-		//logic
 		return search;
 	}
 	
 	//soit pour une meme url l'évolution temps moyen sur plusieurs jours
 	@RequestMapping("/evolutionUrl")
-	public List<Action> evolutionUrl(@RequestParam String url) {
-		return actionService.evolutionUrl(url, LocalDate.now(), LocalDate.now());
+	public List<Action> evolutionUrl(@RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+		return actionService.evolutionUrl(url, dateDebut, dateFin);
+	}
+
+	@RequestMapping("/listUrl")
+	public List<String> listUrl(@RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+		return actionService.listUrl(dateDebut, dateFin);
 	}
 	
 	//soit pour l'ensemble des requete le temps moyen à date 

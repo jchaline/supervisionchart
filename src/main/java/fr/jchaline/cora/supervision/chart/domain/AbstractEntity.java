@@ -18,6 +18,15 @@ public abstract class AbstractEntity {
 	@Column(unique = true, nullable = false)
 	private Long id;
 	
+	/**
+	 * Date de creation de l'objet
+	 */
 	@Column
 	private LocalDateTime dateCreate = LocalDateTime.now();
+
+	/**
+	 * Date de creation de l'objet
+	 */
+	@Column
+	private LocalDateTime dateMaj = LocalDateTime.now();
 }

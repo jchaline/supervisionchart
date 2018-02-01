@@ -4,9 +4,15 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	
 	var colors = ["rgb(192, 75, 100)", "rgb(100, 75, 100)", "rgb(192, 200, 100)", "rgb(192, 75, 200)", "rgb(192, 75, 0)", "rgb(50, 200, 50)", "rgb(200, 50, 200)", "rgb(150, 50, 200)"]
 	
+	$scope.updateUrl = function() {
+		httpService.getData("/chart/listUrl", {dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+			$scope.urls = data
+		})
+	}
+
 	$scope.updateLine = function(urlAction) {
 		console.log("search for " + urlAction)
-		httpService.getData("/chart/evolutionUrl", {url: urlAction, debut: new Date(), fin: new Date(), date: new Date()}).then(function(data){
+		httpService.getData("/chart/evolutionUrl", {url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 			
 			//{url: "commandes.afficherListArtCmdResultat", nb: 0, repartition: Array(5), totalTime: 1000, dateExtraction:{month: "NOVEMBER", year: 2017}}
 			
@@ -37,9 +43,8 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 		})
 	}
 	
-	$scope.updateAction = function() {
+	$scope.updateTimes = function() {
 		httpService.postData("/chart/updateAction", {}).then(function(data){
-			
 		})
 	}
 
@@ -47,5 +52,16 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	angular.element(document).ready(function () {
 		//$scope.updateLine("commandes.afficherListArtCmdResultat")
 		$scope.updateLine("commandes.miseAJour")
+		$scope.updateUrl()
 	});
+})
+
+$(document).ready(function(){
+	$(".datepicker").datepicker({ minDate: -60, maxDate: "+0M +0D" });
+	$(".datepicker").datepicker("option", "dateFormat", "dd/mm/yy")
+	var defautMax = new Date()
+	var defautMin = new Date()
+	defautMin.setMonth(defautMin.getMonth() - 1)
+	$("#dateDebut").datepicker('setDate', defautMin);
+	$("#dateFin").datepicker('setDate', defautMax);
 })

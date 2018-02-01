@@ -40,6 +40,9 @@ public class Action extends AbstractEntity {
 	@Column
 	private int avgTime;
 
+	/**
+	 * Date de creation du log sur le serveur
+	 */
 	@Column
 	private LocalDateTime dateExtraction;
 

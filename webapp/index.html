@@ -10,8 +10,10 @@
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/bootstrap-theme.css">
 	<link rel="stylesheet" href="css/jquery.dataTables.min.css">
+	<link rel="stylesheet" href="js/jquery-ui-1.12.1/jquery-ui.css">
 	
 	<script type="text/javascript" src="js/jquery-1.11.3.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.12.1/jquery-ui.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/angular.min.js"></script>
 	<script type="text/javascript" src="js/lodash.js"></script>
@@ -66,13 +68,31 @@
 	
 	<div class="container" role="main">
 		<div data-ng-controller="lineController" class="row">
-			<div class="col-xs-12 col-sm-12 col-md-12">
+			<div class="col-md-6">
+				<h3>
+					Url Display
+					<span class="pull-right">
+						<input type="text" name="dateDebut" class="input-sm datepicker" size="9" id="dateDebut" />
+						<input type="text" name="dateFin" class="input-sm datepicker" size="9" id="dateFin" />
+						<button class="btn btn-xs btn-primary" data-ng-click="updateUrl()">
+							<i class="glyphicon glyphicon-refresh"></i>
+							<span class="hidden-xs">update Url</span>
+						</button>
+					</span>
+				</h3>
+				<div style="height: 500px; overflow-y: scroll;">
+					<ul>
+						<li ng-repeat="url in urls | orderBy"><input id="{{ url }}" ng-click="updateLine(url)" type="checkbox" value="{{ url }}" />&nbsp;<label for="{{ url }}">{{ url }}</label></li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-md-6">
 				<h3>
 					Line view
 					<span class="pull-right">
-						<button class="btn btn-xs btn-primary" data-ng-click="updateAction()">
+						<button class="btn btn-xs btn-primary" data-ng-click="updateTimes()">
 							<i class="glyphicon glyphicon-refresh"></i>
-							<span class="hidden-xs">update Action</span>
+							<span class="hidden-xs">update times</span>
 						</button>
 					</span>
 				</h3>
