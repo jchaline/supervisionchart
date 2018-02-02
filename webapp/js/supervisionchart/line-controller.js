@@ -4,6 +4,17 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	
 	var colors = ["rgb(192, 75, 100)", "rgb(100, 75, 100)", "rgb(192, 200, 100)", "rgb(192, 75, 200)", "rgb(192, 75, 0)", "rgb(50, 200, 50)", "rgb(200, 50, 200)", "rgb(150, 50, 200)"]
 	
+	var canvasCtx = document.getElementById("myChart").getContext('2d');
+	var config = {
+			type: 'line',
+			data: {},
+			options: {
+				responsive: false,
+				maintainAspectRatio: false
+			}
+		}
+	var myChart = new Chart(canvasCtx, config)
+	
 	$scope.actionSort = "-avgTime"
 	
 	$scope.updateUrl = function() {
@@ -25,25 +36,12 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 			
 			var avgValues = data.map(function(e){return e.avgTime})
 			
-			
 			var newData = [{"label": urlAction, "data": avgValues, "fill": false, "borderColor": colors.random(), "lineTension": 0.1}]
 			
 			var labels = ["12/11/2017", "13/11/2017", "14/11/2017"]
 			
-			var ctx = document.getElementById("myChart").getContext('2d');
-			var config = {
-				type: 'line',
-				data: {
-					labels: extractionValues,
-					datasets: newData
-				},
-				options: {
-					responsive: false,
-					maintainAspectRatio: false
-				}
-			}
-			var myChart = new Chart(ctx, config)
-			
+			myChart.data.labels = extractionValues,
+			myChart.data.datasets = newData
 			myChart.update()
 		})
 	}
