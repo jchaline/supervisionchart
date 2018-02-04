@@ -66,8 +66,25 @@
 		</div>
 	</nav>
 	
-	<div class="container" role="main">
-		<div data-ng-controller="lineController" class="row">
+	<div data-ng-controller="lineController" class="container" role="main">
+		<div class="row">
+			<div class="col-md-12">
+				<span class="pull-right">
+					<select id="" name="" class="input-xs">
+						<option value=""></option>
+						<option ng-selected="serveurs=applications.serveurs" ng-repeat="application in applications | orderBy" value="{{application.libelle}}">{{application.libelle}}</option>
+					</select>
+					<button class="btn btn-xs btn-primary" data-ng-click="updateApplicationsList()">
+						<i class="glyphicon glyphicon-refresh"></i>
+						<span class="hidden-xs">update Applications</span>
+					</button>
+					<span ng-if="serveurs" >
+						toto
+					</span>
+				</span>
+			</div>
+		</div>
+		<div class="row">
 			<div class="col-md-6">
 				<h3>
 					Url Display
