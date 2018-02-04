@@ -36,7 +36,7 @@ public class ChartController extends AbstractSupervisionChartController {
 	
 	//soit pour une meme url l'évolution temps moyen sur plusieurs jours
 	@RequestMapping("/evolutionUrl")
-	public List<Action> evolutionUrl(@RequestParam String server, @RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+	public List<Action> evolutionUrl(@RequestParam List<String> serverList, @RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
 		return actionService.evolutionUrl(url, dateDebut, dateFin);
 	}
 

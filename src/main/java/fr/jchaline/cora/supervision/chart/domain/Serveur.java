@@ -2,6 +2,7 @@ package fr.jchaline.cora.supervision.chart.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -40,6 +41,6 @@ public class Serveur extends AbstractEntity {
 	private String directory;
 	
 	@JsonBackReference
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Application application;
 }

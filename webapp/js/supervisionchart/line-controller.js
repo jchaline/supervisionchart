@@ -19,11 +19,16 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	$scope.actionSort = "-avgTime"
 		
 	$scope.serveurs = [{libelle: 'lx01'}, {libelle: 'lx02'}, {libelle: 'lx03'}, {libelle: 'lx04'}]
-	
+	$scope.applications = []
 	$scope.updateApplicationsList = function() {
 		httpService.getData("/application/list", {forceRefresh: new Date()}).then(function(data){
 			$scope.applications = data
 		})
+	}
+
+	$scope.setServeurs = function(serveurs) {
+		console.log(serveurs)
+		$scope.serveurs = serveurs
 	}
 
 	$scope.updateUrl = function() {
@@ -37,12 +42,10 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 
 	$scope.updateLine = function(urlAction) {
 		
-		var server = "lx01"
+		var serverList = "lx01, lx02, lx03"
 		
-		httpService.getData("/chart/evolutionUrl", {server: server, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
-			
-			//{url: "commandes.afficherListArtCmdResultat", nb: 0, repartition: Array(5), totalTime: 1000, dateExtraction:{month: "NOVEMBER", year: 2017}}
-			
+		httpService.getData("/chart/evolutionUrl", {serverList: serverList, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+
 			var datesValues = data.map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
 			
 			var avgValues = data.map(function(e){return e.avgTime})

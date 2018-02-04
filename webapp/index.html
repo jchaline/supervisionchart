@@ -29,27 +29,6 @@
 	<script type="text/javascript" src="js/supervisionchart/line-controller.js"></script>
 	<script type="text/javascript" src="js/supervisionchart/line-directive.js"></script>
 	<script type="text/javascript" src="js/supervisionchart/http-service.js"></script>
-	
-	<script>
-	
-	function searchAjax() {
-		var data = {}
-		data["query"] = "toto"
-
-		$.ajax({
-			type : "POST",
-			contentType : "application/json",
-			url : "http://localhost/supervisionchart-srv/chart/ajax",
-			data : JSON.stringify(data),
-			dataType : 'json',
-			success : function(data) {
-				console.log("SUCCESS: ");
-				console.log(data);
-			}
-		});
-	}
-	
-	</script>
 </head>
 
 <body role="document" >
@@ -70,16 +49,12 @@
 		<div class="row">
 			<div class="col-md-12">
 				<span class="pull-right">
-					<select id="" name="" class="input-xs">
-						<option value=""></option>
-						<option ng-selected="serveurs=applications.serveurs" ng-repeat="application in applications | orderBy" value="{{application.libelle}}">{{application.libelle}}</option>
+					Choix d'application :
+					<select ng-model="selectedApplication" ng-options="a.libelle for a in applications" >
 					</select>
-					<button class="btn btn-xs btn-primary" data-ng-click="updateApplicationsList()">
-						<i class="glyphicon glyphicon-refresh"></i>
-						<span class="hidden-xs">update Applications</span>
-					</button>
-					<span ng-if="serveurs" >
-						toto
+
+					<span ng-repeat="s in selectedApplication.serveurs" >
+						<input type="checkbox" id="{{s.libelle}}" checked="checked" />&nbsp;<label for="{{s.libelle}}">{{s.libelle}}</label>
 					</span>
 				</span>
 			</div>

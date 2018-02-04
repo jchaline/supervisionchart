@@ -28,8 +28,16 @@ public class FactoryService {
 		
 		Serveur serveur = new Serveur("lx01omega", "192.168.0.10", "jeremy", "galaxxie", 22, "/opt/logappli", application);
 		serveurDao.save(serveur);
+
+		Serveur serveur2 = new Serveur("lx02omega", "192.168.0.10", "jeremy", "galaxxie", 22, "/opt/logappli2", application);
+		serveurDao.save(serveur2);
+
+		Serveur serveur3 = new Serveur("lx03omega", "192.168.0.10", "jeremy", "galaxxie", 22, "/opt/logappli3", application);
+		serveurDao.save(serveur3);
 		
 		application.getServeurs().add(serveur);
+		application.getServeurs().add(serveur2);
+		application.getServeurs().add(serveur3);
 		
 		applicationDao.save(application);
 	}

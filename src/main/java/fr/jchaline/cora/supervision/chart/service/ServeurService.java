@@ -20,7 +20,7 @@ public class ServeurService {
 		return serveurDao.findAll();
 	}
 
-	public List<Serveur> findByApplication() {
+	public List<Serveur> findByApplicationLibelle(String libelle) {
 		return serveurDao.findAll();
 	}
 }
