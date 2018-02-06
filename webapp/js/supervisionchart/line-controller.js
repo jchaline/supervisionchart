@@ -51,7 +51,7 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 			var avgValues = data.map(function(e){return e.avgTime})
 			
 			var newData = [
-				{"label": server, "data": avgValues, "fill": false, "borderColor": colors.random(), "lineTension": 0.1},
+				{"label": "lx01", "data": avgValues, "fill": false, "borderColor": colors.random(), "lineTension": 0.1},
 				{"label": "lx02", "data": avgValues.map(function(e){return e * 0.5}), "fill": false, "borderColor": colors.random(), "lineTension": 0.1}]
 			
 			myChart.data.labels = datesValues,
