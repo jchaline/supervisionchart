@@ -3,6 +3,7 @@ package fr.jchaline.cora.supervision.chart.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,19 +37,8 @@ public class ChartController extends AbstractSupervisionChartController {
 	
 	//soit pour une meme url l'évolution temps moyen sur plusieurs jours
 	@RequestMapping("/evolutionUrl")
-	public List<Action> evolutionUrl(@RequestParam List<String> serverList, @RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
-		return actionService.evolutionUrl(url, dateDebut, dateFin);
-	}
-
-	/**
-	 * Liste des différentes URL sur une période donnée
-	 * @param dateDebut
-	 * @param dateFin
-	 * @return
-	 */
-	@RequestMapping("/listUrl")
-	public List<String> listUrl(@RequestParam String server, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
-		return actionService.listUrl(dateDebut, dateFin);
+	public Map<String, List<Action>> evolutionUrl(@RequestParam List<String> serverList, @RequestParam String url, @RequestParam LocalDate dateDebut, @RequestParam LocalDate dateFin) {
+		return actionService.evolutionUrl(serverList, url, dateDebut, dateFin);
 	}
 	
 	/**

@@ -18,7 +18,7 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	//default value
 	$scope.actionSort = "-avgTime"
 		
-	$scope.serveurs = [{libelle: 'lx01'}, {libelle: 'lx02'}, {libelle: 'lx03'}, {libelle: 'lx04'}]
+	$scope.serveurs = [{libelle: 'lx01omega'}, {libelle: 'lx02omega'}, {libelle: 'lx03omega'}, {libelle: 'lx04omega'}]
 	$scope.applications = []
 	$scope.updateApplicationsList = function() {
 		httpService.getData("/application/list", {forceRefresh: new Date()}).then(function(data){
@@ -32,27 +32,24 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	}
 
 	$scope.updateUrl = function() {
-		httpService.getData("/chart/listUrl", {server: 'lx01', dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
-			$scope.urls = data
-		})
-		httpService.getData("/chart/listAction", {server: 'lx01', dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+		httpService.getData("/chart/listAction", {server: 'lx01omega', dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 			$scope.actions = data
 		})
 	}
 
 	$scope.updateLine = function(urlAction) {
 		
-		var serverList = "lx01, lx02, lx03"
+		var serverList = "lx01omega, lx02omega, lx03omega"
 		
 		httpService.getData("/chart/evolutionUrl", {serverList: serverList, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 
-			var datesValues = data.map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
+			var datesValues = data['lx01omega'].map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
 			
-			var avgValues = data.map(function(e){return e.avgTime})
+			var avgValues = data['lx01omega'].map(function(e){return e.avgTime})
 			
 			var newData = [
-				{"label": "lx01", "data": avgValues, "fill": false, "borderColor": colors.random(), "lineTension": 0.1},
-				{"label": "lx02", "data": avgValues.map(function(e){return e * 0.5}), "fill": false, "borderColor": colors.random(), "lineTension": 0.1}]
+				{"label": "lx01omega", "data": avgValues, "fill": false, "borderColor": colors.random(), "lineTension": 0.1},
+				{"label": "lx02omega", "data": avgValues.map(function(e){return e * 0.5}), "fill": false, "borderColor": colors.random(), "lineTension": 0.1}]
 			
 			myChart.data.labels = datesValues,
 			myChart.data.datasets = newData
@@ -61,7 +58,7 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	}
 	
 	$scope.updateTimes = function() {
-		httpService.postData("/chart/updateAction", {server: 'lx01'}).then(function(data){
+		httpService.postData("/chart/updateAction", {server: 'lx01omega'}).then(function(data){
 		})
 	}
 

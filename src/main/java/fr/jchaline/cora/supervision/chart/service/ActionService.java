@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,7 +31,9 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 
 import fr.jchaline.cora.supervision.chart.dao.ActionDao;
+import fr.jchaline.cora.supervision.chart.dao.ServeurDao;
 import fr.jchaline.cora.supervision.chart.domain.Action;
+import fr.jchaline.cora.supervision.chart.domain.Serveur;
 
 @Transactional(readOnly = true)
 @Service
@@ -40,19 +43,7 @@ public class ActionService {
 	
 	private static final DateTimeFormatter DATE_TIME_FORMATER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	
-	private List<Action> dumbCache = null;
-	
-	@Value("${log.server}")
-	private String server;
-	
-	@Value("${log.login}")
-	private String login;
-	
-	@Value("${log.password}")
-	private String password;
-
-	@Value("${log.directory}")
-	private String repertoire;
+	private Map<String, List<Action>> dumbCache = null;
 	
 	@Value("${log.fichierPattern}")
 	private String fichierPattern;
@@ -63,6 +54,9 @@ public class ActionService {
 	@Autowired
 	private ActionDao actionDao;
 	
+	@Autowired
+	private ServeurDao serveurDao;
+	
 	/**
 	 * Chargement dans la bdd des logs supervision
 	 * @throws JSchException 
@@ -70,20 +64,26 @@ public class ActionService {
 	 * @throws IOException 
 	 */
 	@Transactional(readOnly = false)
-	public List<Action> updateActionFromServer() throws JSchException, SftpException, IOException {
+	public boolean updateActionFromServer() throws JSchException, SftpException, IOException {
+
+		dumbCache = new HashMap<>();
+		List<Serveur> findAll = serveurDao.findAll();
 		
 		actionDao.deleteAll();
 		
-		List<Action> findListAction = findListAction();
+		for (Serveur s : findAll) {
+			List<Action> findListAction = findListAction(s);
+			
+			findListAction.forEach(a -> actionDao.save(a));
+			
+			dumbCache.put(s.getLibelle(), findListAction);
+		}
 		
-		findListAction.forEach(a -> actionDao.save(a));
 		
-		dumbCache = findListAction;
-		
-		return findListAction;
+		return true;
 	}
 
-	private List<Action> findListAction() throws JSchException, SftpException, IOException {
+	private List<Action> findListAction(Serveur serveur) throws JSchException, SftpException, IOException {
 		List<Action> listAction = new ArrayList<Action>();
 		
 		final String strUrlPattern = "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}):\\d{2},\\d{3} +\\/([\\w\\.]+)\\.do";
@@ -107,11 +107,11 @@ public class ActionService {
 		final String strRepartitionPattern = ".*Repartition.*: (\\d+ - \\d+ - \\d+ - \\d+ - \\d+)";
 		Pattern repartitionPattern = Pattern.compile(strRepartitionPattern) ;
 
-		ChannelSftp sftpChannel = sshService.buildChannel(server, login, password);
+		ChannelSftp sftpChannel = sshService.buildChannel(serveur.getUrl(), serveur.getLogin(), serveur.getPassword());
 
-		sftpChannel.cd(repertoire);
+		sftpChannel.cd(serveur.getDirectory());
 		@SuppressWarnings("unchecked")
-		Stream<LsEntry> map = sftpChannel.ls(repertoire).stream().map(e -> ((LsEntry) e));
+		Stream<LsEntry> map = sftpChannel.ls(serveur.getDirectory()).stream().map(e -> ((LsEntry) e));
 		map = map.filter(e -> e.getFilename().matches(fichierPattern));
 		List<LsEntry> entries = map.collect(Collectors.toList());
 		
@@ -141,7 +141,7 @@ public class ActionService {
 					
 					//nouvelle url, nouvelle action
 					currentAction = new Action();
-					currentAction.setServer("lx01");
+					currentAction.setServer(serveur.getLibelle());
 					currentAction.setUrl(currentUrl);
 					currentAction.setDateExtraction(LocalDateTime.parse(currentDateTime, DATE_TIME_FORMATER));
 				}
@@ -198,27 +198,20 @@ public class ActionService {
 		return null;
 	}
 	
-	public List<Action> evolutionUrl(String url, LocalDate debut, LocalDate fin) {
-		List<Action> collect = new ArrayList<>();
+	public Map<String, List<Action>> evolutionUrl(List<String> serverList, String url, LocalDate debut, LocalDate fin) {
+		Map<String, List<Action>> collect = new HashMap<>();
 		
 		if (dumbCache != null) {
 			Comparator<Action> byDate = (e1, e2) -> e1.getDateExtraction().compareTo(e2.getDateExtraction());
-			
-			collect = dumbCache.stream().filter(a -> a.getUrl().equals(url)).sorted(byDate).collect(Collectors.toList());
-		}
-		
-		return collect;
-	}
 
-	public List<String> listUrl(LocalDate firstDay, LocalDate lastDay) {
-		List<String> collect = new ArrayList<>();
-		
-		if (dumbCache != null) {
-			collect = dumbCache.parallelStream()
-					.filter(e -> e.getDateExtraction().toLocalDate().isAfter(firstDay))
-					.filter(e -> e.getDateExtraction().toLocalDate().isBefore(lastDay))
-					.map(e -> e.getUrl())
-					.distinct().collect(Collectors.toList());
+			for (String server : serverList) {
+				List<Action> list = dumbCache.get(server);
+				if (list != null) {
+					List<Action> collect2 = list.stream().filter(a -> a.getUrl().equals(url)).sorted(byDate).collect(Collectors.toList());
+					collect.put(server, collect2);
+				}
+			}
+			
 		}
 		
 		return collect;
@@ -234,7 +227,7 @@ public class ActionService {
 		List<Action> result = new ArrayList<>();
 		
 		if (dumbCache != null) {
-			Map<String, List<Action>> grouped = dumbCache.parallelStream()
+			Map<String, List<Action>> grouped = dumbCache.get(server).parallelStream()
 					.filter(e -> e.getServer().equals(server))
 					.filter(e -> e.getDateExtraction().toLocalDate().isAfter(firstDay))
 					.filter(e -> e.getDateExtraction().toLocalDate().isBefore(lastDay))
