@@ -36,38 +36,73 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 			$scope.actions = data
 		})
 	}
+	
+	function compareDate(d1, d2) {
+		var a = d1.split('/')
+		var b = d2.split('/')
+		
+		if (parseInt(a[2]) == parseInt(b[2])) {
+			if (parseInt(a[1]) == parseInt(b[1])) {
+				if (parseInt(a[0]) == parseInt(b[0])) {
+					return 0
+				} else if (parseInt(a[0]) < parseInt(b[0])) {
+					return -1
+				} else {
+					return 1
+				}
+			} else if (parseInt(a[1]) < parseInt(b[1])) {
+				return -1
+			} else {
+				return 1
+			}
+		} else if (parseInt(a[2]) < parseInt(b[2])) {
+			return -1
+		} else {
+			return 1
+		}
+	}
 
 	$scope.updateLine = function(urlAction) {
 		
 		var serverList = "lx01omega, lx02omega, lx03omega"
 		
 		httpService.getData("/chart/evolutionUrl", {serverList: serverList, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+			var maplx1 = data['lx01omega'].reduce(function(map, e) {
+				map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
+				return map;
+			}, {});
 
-			var datesValues1 = data['lx01omega'].map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
-			var datesValues2 = data['lx02omega'].map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
-			
-			var avgValues1 = data['lx01omega'].map(function(e){return e.avgTime})
-			var avgValues2 = data['lx02omega'].map(function(e){return e.avgTime})
-			
-			var test = data['lx01omega'].reduce(function(map, e) {
+			var maplx2 = data['lx02omega'].reduce(function(map, e) {
 				map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
 				return map;
 			}, {});
 			
-			console.log(test)
-			
-			for (var i=0; i<datesValues2.length; i++) {
-				if (!(datesValues2[i] in datesValues1)) {
-					datesValues1.push(datesValues2[i])
-					avgValues1.push(avgValues2[i])
+			for (key in maplx1) {
+				if (!(key in maplx2)) {
+					maplx2[key] = null
+				}
+			}
+
+			for (key in maplx2) {
+				if (!(key in maplx1)) {
+					maplx1[key] = null
 				}
 			}
 			
-			var newData = [
-				{"label": "lx01omega", "data": avgValues1, "fill": false, "borderColor": colors.random(), "lineTension": 0.1},
-				{"label": "lx02omega", "data": avgValues1.map(function(e){return e * 0.5}), "fill": false, "borderColor": colors.random(), "lineTension": 0.1}]
+			var keyArray = Object.keys(maplx1).sort(compareDate)
 			
-			myChart.data.labels = datesValues1,
+			var values1 = []
+			var values2 = []
+			for (i=0; i<keyArray.length; i++) {
+				values1.push(maplx1[keyArray[i]])
+				values2.push(maplx2[keyArray[i]])
+			}
+			
+			var newData = [
+				{"label": "lx01omega", "data": values1, "fill": false, "borderColor": colors[4], "lineTension": 0.1},
+				{"label": "lx02omega", "data": values2, "fill": false, "borderColor": colors[1], "lineTension": 0.1}]
+			
+			myChart.data.labels = keyArray,
 			myChart.data.datasets = newData
 			myChart.update()
 		})
