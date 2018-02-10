@@ -43,15 +43,31 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 		
 		httpService.getData("/chart/evolutionUrl", {serverList: serverList, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
 
-			var datesValues = data['lx01omega'].map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
+			var datesValues1 = data['lx01omega'].map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
+			var datesValues2 = data['lx02omega'].map(function(e){return e.dateExtraction}).map(function(e){return e.dayOfMonth + "/" + e.monthValue + "/" + e.year})
 			
-			var avgValues = data['lx01omega'].map(function(e){return e.avgTime})
+			var avgValues1 = data['lx01omega'].map(function(e){return e.avgTime})
+			var avgValues2 = data['lx02omega'].map(function(e){return e.avgTime})
+			
+			var test = data['lx01omega'].reduce(function(map, e) {
+				map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
+				return map;
+			}, {});
+			
+			console.log(test)
+			
+			for (var i=0; i<datesValues2.length; i++) {
+				if (!(datesValues2[i] in datesValues1)) {
+					datesValues1.push(datesValues2[i])
+					avgValues1.push(avgValues2[i])
+				}
+			}
 			
 			var newData = [
-				{"label": "lx01omega", "data": avgValues, "fill": false, "borderColor": colors.random(), "lineTension": 0.1},
-				{"label": "lx02omega", "data": avgValues.map(function(e){return e * 0.5}), "fill": false, "borderColor": colors.random(), "lineTension": 0.1}]
+				{"label": "lx01omega", "data": avgValues1, "fill": false, "borderColor": colors.random(), "lineTension": 0.1},
+				{"label": "lx02omega", "data": avgValues1.map(function(e){return e * 0.5}), "fill": false, "borderColor": colors.random(), "lineTension": 0.1}]
 			
-			myChart.data.labels = datesValues,
+			myChart.data.labels = datesValues1,
 			myChart.data.datasets = newData
 			myChart.update()
 		})
