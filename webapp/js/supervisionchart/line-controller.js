@@ -64,50 +64,55 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 
 	$scope.updateLine = function(urlAction) {
 		
-		var serverList = "lx01omega, lx02omega, lx03omega"
-		var serverArray = ["lx01omega", "lx02omega", "lx03omega"]
-		
-		httpService.getData("/chart/evolutionUrl", {serverList: serverList, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
-			
-			var mapList = serverArray.map(arrayId => {
-				return data[arrayId].reduce(function(map, e) {
-					map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
-					return map;
-				}, {});
-			})
-			
-			//list des maps date => temps moyen pour l'url donnée
-			for (var i=0; i<mapList.length; i++) {
-				for (var j=0; j<mapList.length; j++) {
-					if (i != j) {
-						for (key in mapList[i]) {
-							if (!(key in mapList[j])) {
-								mapList[j][key] = null
+		if ($scope.selectedApplication) {
+			var serverList = $scope.selectedApplication.serveurs.map(s => s.libelle).join(',')
+
+			httpService.getData("/chart/evolutionUrl", {serverList: serverList, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
+				
+				//transformation de la liste d'action en map date => temps moyen
+				var mapList = serverList.split(',').map(arrayId => {
+					return data[arrayId].reduce(function(map, e) {
+						map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
+						return map;
+					}, {});
+				})
+				
+				//combinaison des maps, ajout des dates inexistantes sur chaque serveurs pour affichers les courbes sur le même graphique
+				for (var i=0; i<mapList.length; i++) {
+					for (var j=0; j<mapList.length; j++) {
+						if (i != j) {
+							for (key in mapList[i]) {
+								if (!(key in mapList[j])) {
+									mapList[j][key] = null
+								}
 							}
 						}
 					}
 				}
-			}
-			
-			var keyArray = Object.keys(mapList[0]).sort(compareDate)
-			
-			var valuesList = []
-			for (var i=0; i<mapList.length; i++) {
-				valuesList[i] = []
-				for (var j=0; j<keyArray.length; j++) {
-					valuesList[i].push(mapList[i][keyArray[j]])
+				
+				//liste des dates à affichers sur le graphique
+				var keyArray = Object.keys(mapList[0]).sort(compareDate)
+				
+				//obtention des valeurs pour chaque dates et chaque server
+				var valuesList = []
+				for (var i=0; i<mapList.length; i++) {
+					valuesList[i] = []
+					for (var j=0; j<keyArray.length; j++) {
+						valuesList[i].push(mapList[i][keyArray[j]])
+					}
 				}
-			}
-			
-			var i = 0
-			var newData = valuesList.map(vl => {
-				return {"label": i, "data": vl, "fill": false, "borderColor": colors[i++], "lineTension": 0.1}
+				
+				var i = 0
+				var newData = valuesList.map(vl => {
+					return {"label": i, "data": vl, "fill": false, "borderColor": colors[i++], "lineTension": 0.1}
+				})
+				
+				myChart.data.labels = keyArray,
+				myChart.data.datasets = newData
+				myChart.update()
 			})
+		}
 			
-			myChart.data.labels = keyArray,
-			myChart.data.datasets = newData
-			myChart.update()
-		})
 	}
 	
 	$scope.updateTimes = function() {
