@@ -65,42 +65,44 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 	$scope.updateLine = function(urlAction) {
 		
 		var serverList = "lx01omega, lx02omega, lx03omega"
+		var serverArray = ["lx01omega", "lx02omega", "lx03omega"]
 		
 		httpService.getData("/chart/evolutionUrl", {serverList: serverList, url: urlAction, dateDebut: new $('#dateDebut').val(), dateFin: new $('#dateFin').val(), forceRefresh: new Date()}).then(function(data){
-			var maplx1 = data['lx01omega'].reduce(function(map, e) {
-				map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
-				return map;
-			}, {});
-
-			var maplx2 = data['lx02omega'].reduce(function(map, e) {
-				map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
-				return map;
-			}, {});
 			
-			for (key in maplx1) {
-				if (!(key in maplx2)) {
-					maplx2[key] = null
+			var mapList = serverArray.map(arrayId => {
+				return data[arrayId].reduce(function(map, e) {
+					map[(e.dateExtraction.dayOfMonth + "/" + e.dateExtraction.monthValue + "/" + e.dateExtraction.year)] = e.avgTime;
+					return map;
+				}, {});
+			})
+			
+			//list des maps date => temps moyen pour l'url donnée
+			for (var i=0; i<mapList.length; i++) {
+				for (var j=0; j<mapList.length; j++) {
+					if (i != j) {
+						for (key in mapList[i]) {
+							if (!(key in mapList[j])) {
+								mapList[j][key] = null
+							}
+						}
+					}
 				}
 			}
-
-			for (key in maplx2) {
-				if (!(key in maplx1)) {
-					maplx1[key] = null
+			
+			var keyArray = Object.keys(mapList[0]).sort(compareDate)
+			
+			var valuesList = []
+			for (var i=0; i<mapList.length; i++) {
+				valuesList[i] = []
+				for (var j=0; j<keyArray.length; j++) {
+					valuesList[i].push(mapList[i][keyArray[j]])
 				}
 			}
 			
-			var keyArray = Object.keys(maplx1).sort(compareDate)
-			
-			var values1 = []
-			var values2 = []
-			for (i=0; i<keyArray.length; i++) {
-				values1.push(maplx1[keyArray[i]])
-				values2.push(maplx2[keyArray[i]])
-			}
-			
-			var newData = [
-				{"label": "lx01omega", "data": values1, "fill": false, "borderColor": colors[4], "lineTension": 0.1},
-				{"label": "lx02omega", "data": values2, "fill": false, "borderColor": colors[1], "lineTension": 0.1}]
+			var i = 0
+			var newData = valuesList.map(vl => {
+				return {"label": i++, "data": vl, "fill": false, "borderColor": colors[i], "lineTension": 0.1}
+			})
 			
 			myChart.data.labels = keyArray,
 			myChart.data.datasets = newData
