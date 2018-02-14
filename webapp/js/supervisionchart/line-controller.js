@@ -2,7 +2,7 @@ var app = angular.module( "lineModule", ['datatables', 'ngResource'] )
 
 app.controller("lineController", function( $scope, $rootScope, $interval, httpService ) {
 	
-	var colors = ["rgb(192, 75, 100)", "rgb(100, 75, 100)", "rgb(192, 200, 100)", "rgb(192, 75, 200)", "rgb(192, 75, 0)", "rgb(50, 200, 50)", "rgb(200, 50, 200)", "rgb(150, 50, 200)"]
+	var colors = ["rgb(250, 0, 0)", "rgb(0, 163, 0)", "rgb(0, 0, 255)", "rgb(200, 150, 60)", "rgb(192, 75, 0)", "rgb(50, 200, 50)", "rgb(200, 50, 200)", "rgb(150, 50, 200)"]
 	
 	var canvasCtx = document.getElementById("myChart").getContext('2d');
 	var config = {
@@ -101,7 +101,7 @@ app.controller("lineController", function( $scope, $rootScope, $interval, httpSe
 			
 			var i = 0
 			var newData = valuesList.map(vl => {
-				return {"label": i++, "data": vl, "fill": false, "borderColor": colors[i], "lineTension": 0.1}
+				return {"label": i, "data": vl, "fill": false, "borderColor": colors[i++], "lineTension": 0.1}
 			})
 			
 			myChart.data.labels = keyArray,
