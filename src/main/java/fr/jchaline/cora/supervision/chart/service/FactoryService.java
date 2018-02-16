@@ -1,10 +1,17 @@
 package fr.jchaline.cora.supervision.chart.service;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fr.jchaline.cora.supervision.chart.dao.ApplicationDao;
 import fr.jchaline.cora.supervision.chart.dao.ServeurDao;
@@ -15,6 +22,8 @@ import fr.jchaline.cora.supervision.chart.domain.Serveur;
 @Service
 public class FactoryService {
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(FactoryService.class);
+	
 	@Autowired
 	private ApplicationDao applicationDao;
 	
@@ -22,23 +31,25 @@ public class FactoryService {
 	private ServeurDao serveurDao;
 
 	@Transactional(readOnly = false)
-	public void generateData() {
-		Application application = new Application("omega", new ArrayList<>());
-		applicationDao.save(application);
-		
-		Serveur serveur = new Serveur("lx01omega", "192.168.0.10", "jeremy", "galaxxie", 22, "/opt/logappli", application);
-		serveurDao.save(serveur);
-
-		Serveur serveur2 = new Serveur("lx02omega", "192.168.0.10", "jeremy", "galaxxie", 22, "/opt/logappli2", application);
-		serveurDao.save(serveur2);
-
-		Serveur serveur3 = new Serveur("lx03omega", "192.168.0.10", "jeremy", "galaxxie", 22, "/opt/logappli3", application);
-		serveurDao.save(serveur3);
-		
-		application.getServeurs().add(serveur);
-		application.getServeurs().add(serveur2);
-		application.getServeurs().add(serveur3);
-		
-		applicationDao.save(application);
+	public void generateData(Resource resourceConfig) {
+		ObjectMapper mapper = new ObjectMapper();
+		TypeReference<List<Application>> mapType = new TypeReference<List<Application>>() {};
+		try {
+			List<Application> readValue = mapper.readValue(resourceConfig.getInputStream(), mapType);
+			for (Application a : readValue) {
+				applicationDao.save(a);
+				
+				for (Serveur s : a.getServeurs()) {
+					s.setApplication(a);
+					serveurDao.save(s);
+				}
+				
+				applicationDao.save(a);
+				
+				LOGGER.info(a.getLibelle() + " save");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

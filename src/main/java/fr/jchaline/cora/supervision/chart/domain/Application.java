@@ -9,7 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +27,7 @@ public class Application extends AbstractEntity {
 	@Column(nullable = false)
 	private String libelle;
 
-	@JsonManagedReference
+	@JsonIgnoreProperties("application")
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy="application")
 	private List<Serveur> serveurs;
 }

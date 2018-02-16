@@ -19,6 +19,7 @@ public class ApplicationController extends AbstractSupervisionChartController {
 	
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	public List<Application> list() {
-		return applicationService.findAll();
+		List<Application> findAll = applicationService.findAll();
+		return findAll;
 	}
 }

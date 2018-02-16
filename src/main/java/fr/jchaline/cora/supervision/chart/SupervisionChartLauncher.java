@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.Resource;
 
 import fr.jchaline.cora.supervision.chart.service.FactoryService;
 
@@ -16,8 +17,10 @@ public class SupervisionChartLauncher {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext ctx = SpringApplication.run(SupervisionChartLauncher.class, args);
 		
+		Resource resourceConfig = ctx.getResource("classpath:servers.json");
+		
 		FactoryService factory = ctx.getBean(FactoryService.class);
-		factory.generateData();
+		factory.generateData(resourceConfig);
 		
 		LOGGER.info("SupervisionChart Start successfull, wait for http layer ...");
 	}

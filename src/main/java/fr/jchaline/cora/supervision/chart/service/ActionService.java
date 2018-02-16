@@ -79,7 +79,6 @@ public class ActionService {
 			dumbCache.put(s.getLibelle(), findListAction);
 		}
 		
-		
 		return true;
 	}
 

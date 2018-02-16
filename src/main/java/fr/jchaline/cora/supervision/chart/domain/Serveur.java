@@ -6,7 +6,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,7 +40,7 @@ public class Serveur extends AbstractEntity {
 	@Column(nullable = false)
 	private String directory;
 	
-	@JsonBackReference
+	@JsonIgnoreProperties("serveurs")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Application application;
 }
