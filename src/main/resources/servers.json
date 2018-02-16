@@ -1,1 +1,5 @@
-[{"libelle": "omega", "serveurs":[{"libelle": "lx01omega", "url": "192.168.1.1", "login": "jeremy", "password": "jeremy", "port": 22, "directory": "/opt/logappli"}]}]
+[{"libelle": "omega", "serveurs":[
+	{"libelle": "lx01omega", "url": "192.168.1.1", "login": "jeremy", "password": "jeremy", "port": 22, "directory": "/opt/logappli"},
+	{"libelle": "lx02omega", "url": "192.168.1.1", "login": "jeremy", "password": "jeremy", "port": 22, "directory": "/opt/logappli"},
+	{"libelle": "lx03omega", "url": "192.168.1.1", "login": "jeremy", "password": "jeremy", "port": 22, "directory": "/opt/logappli"}
+]}]

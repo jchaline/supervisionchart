@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Serveur extends AbstractEntity {
 	
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String libelle;
 	
 	@Column(nullable = false)
