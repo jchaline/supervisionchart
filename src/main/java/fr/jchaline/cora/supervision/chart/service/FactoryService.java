@@ -32,24 +32,28 @@ public class FactoryService {
 
 	@Transactional(readOnly = false)
 	public void generateData(Resource resourceConfig) {
-		ObjectMapper mapper = new ObjectMapper();
-		TypeReference<List<Application>> mapType = new TypeReference<List<Application>>() {};
-		try {
-			List<Application> readValue = mapper.readValue(resourceConfig.getInputStream(), mapType);
-			for (Application a : readValue) {
-				applicationDao.save(a);
-				
-				for (Serveur s : a.getServeurs()) {
-					s.setApplication(a);
-					serveurDao.save(s);
+		if (resourceConfig.exists() && resourceConfig.isReadable()) {
+			ObjectMapper mapper = new ObjectMapper();
+			TypeReference<List<Application>> mapType = new TypeReference<List<Application>>() {};
+			try {
+				List<Application> readValue = mapper.readValue(resourceConfig.getInputStream(), mapType);
+				for (Application a : readValue) {
+					applicationDao.save(a);
+					
+					for (Serveur s : a.getServeurs()) {
+						s.setApplication(a);
+						serveurDao.save(s);
+					}
+					
+					applicationDao.save(a);
+					
+					LOGGER.info(a.getLibelle() + " save");
 				}
-				
-				applicationDao.save(a);
-				
-				LOGGER.info(a.getLibelle() + " save");
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} else {
+			LOGGER.error("ATTENTION, PAS DE FICHIER DE CONFIG JSON");
 		}
 	}
 }
